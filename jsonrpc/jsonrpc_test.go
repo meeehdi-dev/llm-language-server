@@ -32,7 +32,7 @@ func TestDecodeMessage(t *testing.T) {
 		t.Errorf("Expected content length %d, got %d", expectedLength, contentLength)
 	}
 
-	var request lsp.Request
+	var request lsp.RequestMessage
 	err = json.Unmarshal(content, &request)
 	if err != nil {
 		t.Errorf("%s", err.Error())
