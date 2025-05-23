@@ -1,0 +1,14 @@
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        type: string
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # checkout to get go.sum and enable caching
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go-version }}

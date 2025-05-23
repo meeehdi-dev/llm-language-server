@@ -1,0 +1,24 @@
+name: "Build"
+description: "Builds and caches"
+inputs:
+  go-version:
+    description: "Go version"
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
+    - uses: actions/cache@v4
+      with:
+        path: /home/runner/go/bin
+        key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+    - shell: bash
+      if: runner.os == 'Linux'
+      run: go build -o llm-language-server ./main.go
+    - shell: pwsh
+      if: runner.os == 'Windows'
+      run: go build -o llm-language-server.exe ./main.go
+    - shell: bash
+      if: runner.os == 'macOS'
+      run: go build -o llm-language-server ./main.go

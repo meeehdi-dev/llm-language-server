@@ -1,0 +1,39 @@
+on:
+  push:
+    branches:
+      - '*'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  set-version:
+    runs-on: ubuntu-latest
+    outputs:
+      go-version: ${{ steps.set-version.outputs.go-version }}
+    steps:
+      - id: set-version
+        run: |
+          echo "go-version=1.24.3" >> $GITHUB_OUTPUT
+  setup:
+    needs: [set-version]
+    uses: ./.github/workflows/setup.yml
+    with:
+      go-version: ${{ needs.set-version.outputs.go-version }}
+  build:
+    runs-on: ubuntu-latest
+    needs: [set-version, setup]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build
+        with:
+          go-version: ${{ needs.set-version.outputs.go-version }}
+  test:
+    runs-on: ubuntu-latest
+    needs: [set-version, build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ needs.set-version.outputs.go-version }}
+      - shell: bash
+        run: go test ./...
