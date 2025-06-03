@@ -8,16 +8,13 @@ runs:
   steps:
     - if: runner.os == 'Linux'
       shell: bash
-      working-directory: build/bin
       run: |
-        zip -r llm-language-server-linux.zip *
+        zip -r llm-language-server-linux.zip llm-language-server
     - if: runner.os == 'Windows'
       shell: pwsh
-      working-directory: build/bin
       run: |
-        Compress-Archive -Path * -Destination llm-language-server-windows.zip
+        Compress-Archive -Path llm-language-server.exe -Destination llm-language-server-windows.zip
     - if: runner.os == 'macOs'
       shell: bash
-      working-directory: build/bin
       run: |
-        zip -r llm-language-server-macos.zip *
+        zip -r llm-language-server-macos.zip llm-language-server
