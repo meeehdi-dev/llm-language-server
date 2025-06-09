@@ -28,7 +28,7 @@ jobs:
         with:
           go-version: ${{ needs.set-version.outputs.go-version }}
           go-os: ${{ matrix.os }}
-          go-arch: ${{ maxtrix.arch }}
+          go-arch: ${{ matrix.arch }}
       - uses: ./.github/actions/zip
         with:
           go-os: ${{ matrix.os }}
