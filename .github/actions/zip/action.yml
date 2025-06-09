@@ -3,6 +3,8 @@ description: "Compress built files"
 inputs:
   goos:
     description: "Target OS"
+  goarch:
+    description: "Target architecture"
 runs:
   using: composite
   steps:
