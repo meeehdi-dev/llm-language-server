@@ -1,28 +1,28 @@
 name: "Build"
 description: "Builds and caches"
 inputs:
-  go-version:
+  goversion:
     description: "Go version"
-  go-os:
+  goos:
     description: "Target OS"
-  go-arch:
+  goarch:
     description: "Target architecture"
 runs:
   using: composite
   steps:
     - uses: actions/setup-go@v5
       with:
-        go-version: ${{ inputs.go-version }}
+        goversion: ${{ inputs.goversion }}
     - uses: actions/cache@v4
       with:
         path: /home/runner/go/bin
         key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
     - shell: bash
-      if: inputs.go-os == 'linux'
-      run: GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -o llm-language-server ./main.go
+      if: inputs.goos == 'linux'
+      run: GOOS=${{ inputs.goos }} GOARCH=${{ inputs.goarch }} go build -o llm-language-server ./main.go
     - shell: pwsh
-      if: inputs.go-os == 'windows'
-      run: GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -o llm-language-server.exe ./main.go
+      if: inputs.goos == 'windows'
+      run: GOOS=${{ inputs.goos }} GOARCH=${{ inputs.goarch }} go build -o llm-language-server.exe ./main.go
     - shell: bash
-      if: inputs.go-os == 'darwin'
-      run: GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -o llm-language-server ./main.go
+      if: inputs.goos == 'darwin'
+      run: GOOS=${{ inputs.goos }} GOARCH=${{ inputs.goarch }} go build -o llm-language-server ./main.go

@@ -9,16 +9,16 @@ jobs:
   set-version:
     runs-on: ubuntu-latest
     outputs:
-      go-version: ${{ steps.set-version.outputs.go-version }}
+      goversion: ${{ steps.set-version.outputs.goversion }}
     steps:
       - id: set-version
         run: |
-          echo "go-version=1.24.3" >> $GITHUB_OUTPUT
+          echo "goversion=1.24.3" >> $GITHUB_OUTPUT
   setup:
     needs: [set-version]
     uses: ./.github/workflows/setup.yml
     with:
-      go-version: ${{ needs.set-version.outputs.go-version }}
+      goversion: ${{ needs.set-version.outputs.goversion }}
   build:
     strategy:
       matrix:
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
         with:
-          go-version: ${{ needs.set-version.outputs.go-version }}
+          goversion: ${{ needs.set-version.outputs.goversion }}
   test:
     runs-on: ubuntu-latest
     needs: [set-version, build]
@@ -38,6 +38,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ needs.set-version.outputs.go-version }}
+          goversion: ${{ needs.set-version.outputs.goversion }}
       - shell: bash
         run: go test ./...

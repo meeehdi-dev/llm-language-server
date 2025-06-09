@@ -5,38 +5,38 @@ jobs:
   set-version:
     runs-on: ubuntu-latest
     outputs:
-      go-version: ${{ steps.set-version.outputs.go-version }}
+      goversion: ${{ steps.set-version.outputs.goversion }}
     steps:
       - id: set-version
         run: |
-          echo "go-version=1.24.3" >> $GITHUB_OUTPUT
+          echo "goversion=1.24.3" >> $GITHUB_OUTPUT
   setup:
     needs: [set-version]
     uses: ./.github/workflows/setup.yml
     with:
-      go-version: ${{ needs.set-version.outputs.go-version }}
+      goversion: ${{ needs.set-version.outputs.goversion }}
   build:
     strategy:
       matrix:
-        os: [darwin, linux, windows]
-        arch: ["386", amd64, arm, arm64]
+        goos: [darwin, linux, windows]
+        goarch: ["386", amd64, arm, arm64]
         exclude:
-          - os: darwin
-            arch: arm
-          - os: darwin
-            arch: "386"
+          - goos: darwin
+            goarch: arm
+          - goos: darwin
+            goarch: "386"
     runs-on: ubuntu-latest
     needs: [set-version, setup]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
         with:
-          go-version: ${{ needs.set-version.outputs.go-version }}
-          go-os: ${{ matrix.os }}
-          go-arch: ${{ matrix.arch }}
+          goversion: ${{ needs.set-version.outputs.goversion }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
       - uses: ./.github/actions/zip
         with:
-          go-os: ${{ matrix.os }}
+          goos: ${{ matrix.goos }}
       - uses: softprops/action-gh-release@v2
         with:
           files: |

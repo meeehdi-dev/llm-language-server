@@ -1,7 +1,7 @@
 on:
   workflow_call:
     inputs:
-      go-version:
+      goversion:
         type: string
 
 jobs:
@@ -11,4 +11,4 @@ jobs:
       - uses: actions/checkout@v4 # checkout to get go.sum and enable caching
       - uses: actions/setup-go@v5
         with:
-          go-version: ${{ inputs.go-version }}
+          goversion: ${{ inputs.goversion }}
