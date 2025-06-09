@@ -18,11 +18,4 @@ runs:
         path: /home/runner/go/bin
         key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
     - shell: bash
-      if: inputs.goos == 'linux'
-      run: GOOS=${{ inputs.goos }} GOARCH=${{ inputs.goarch }} go build -o llm-language-server ./main.go
-    - shell: pwsh
-      if: inputs.goos == 'windows'
-      run: GOOS=${{ inputs.goos }} GOARCH=${{ inputs.goarch }} go build -o llm-language-server.exe ./main.go
-    - shell: bash
-      if: inputs.goos == 'darwin'
-      run: GOOS=${{ inputs.goos }} GOARCH=${{ inputs.goarch }} go build -o llm-language-server ./main.go
+      run: GOOS=${{ inputs.goos }} GOARCH=${{ inputs.goarch }} go build
