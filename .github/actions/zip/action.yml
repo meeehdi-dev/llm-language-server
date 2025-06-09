@@ -9,12 +9,12 @@ runs:
     - if: inputs.goos == 'linux'
       shell: bash
       run: |
-        zip -r llm-language-server-linux.zip llm-language-server
+        zip -r llm-language-server-${{ inputs.goos }}-${{ inputs.goarch }}.zip llm-language-server
     - if: inputs.goos == 'windows'
-      shell: pwsh
+      shell: bash
       run: |
-        Compress-Archive -Path llm-language-server.exe -Destination llm-language-server-windows.zip
+        zip -r llm-language-server-${{ inputs.goos }}-${{ inputs.goarch }}.zip llm-language-server.exe
     - if: inputs.goos == 'darwin'
       shell: bash
       run: |
-        zip -r llm-language-server-macos.zip llm-language-server
+        zip -r llm-language-server-${{ inputs.goos }}-${{ inputs.goarch }}.zip llm-language-server

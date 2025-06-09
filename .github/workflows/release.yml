@@ -37,6 +37,7 @@ jobs:
       - uses: ./.github/actions/zip
         with:
           goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
       - uses: softprops/action-gh-release@v2
         with:
           files: |
