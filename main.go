@@ -37,6 +37,6 @@ func main() {
 		if *debug {
 			writer.Write(lsp.NewNotificationMessage(lsp.NewLogMesssage(fmt.Sprintf("Successfully received message: %s", string(message)), lsp.Debug)))
 		}
-		go HandleMessage(writer, message)
+		HandleMessage(writer, message)
 	}
 }
