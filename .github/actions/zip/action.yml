@@ -1,20 +1,20 @@
 name: "Compress"
 description: "Compress built files"
 inputs:
-  go-version:
-    description: "Go version"
+  go-os:
+    description: "Target OS"
 runs:
   using: composite
   steps:
-    - if: runner.os == 'Linux'
+    - if: inputs.go-os == 'linux'
       shell: bash
       run: |
         zip -r llm-language-server-linux.zip llm-language-server
-    - if: runner.os == 'Windows'
+    - if: inputs.go-os == 'windows'
       shell: pwsh
       run: |
         Compress-Archive -Path llm-language-server.exe -Destination llm-language-server-windows.zip
-    - if: runner.os == 'macOs'
+    - if: inputs.go-os == 'darwin'
       shell: bash
       run: |
         zip -r llm-language-server-macos.zip llm-language-server

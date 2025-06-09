@@ -1,7 +1,6 @@
 on:
   release:
     types: [published]
-
 jobs:
   set-version:
     runs-on: ubuntu-latest
@@ -19,15 +18,20 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+        os: [darwin, linux, windows]
+        arch: [386, amd64, arm, arm64]
+    runs-on: ubuntu-latest
     needs: [set-version, setup]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
         with:
           go-version: ${{ needs.set-version.outputs.go-version }}
+          go-os: ${{ matrix.os }}
+          go-arch: ${{ maxtrix.arch }}
       - uses: ./.github/actions/zip
+        with:
+          go-os: ${{ matrix.os }}
       - uses: softprops/action-gh-release@v2
         with:
           files: |

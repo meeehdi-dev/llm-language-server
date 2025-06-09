@@ -3,6 +3,10 @@ description: "Builds and caches"
 inputs:
   go-version:
     description: "Go version"
+  go-os:
+    description: "Target OS"
+  go-arch:
+    description: "Target architecture"
 runs:
   using: composite
   steps:
@@ -14,11 +18,11 @@ runs:
         path: /home/runner/go/bin
         key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
     - shell: bash
-      if: runner.os == 'Linux'
-      run: go build -o llm-language-server ./main.go
+      if: inputs.go-os == 'linux'
+      run: GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -o llm-language-server ./main.go
     - shell: pwsh
-      if: runner.os == 'Windows'
-      run: go build -o llm-language-server.exe ./main.go
+      if: inputs.go-os == 'windows'
+      run: GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -o llm-language-server.exe ./main.go
     - shell: bash
-      if: runner.os == 'macOS'
-      run: go build -o llm-language-server ./main.go
+      if: inputs.go-os == 'darwin'
+      run: GOOS=${{ inputs.go-os }} GOARCH=${{ inputs.go-arch }} go build -o llm-language-server ./main.go
