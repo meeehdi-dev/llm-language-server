@@ -20,6 +20,10 @@ jobs:
     with:
       go-version: ${{ needs.set-version.outputs.go-version }}
   build:
+    strategy:
+      matrix:
+        os: [linux]
+        arch: [amd64]
     runs-on: ubuntu-latest
     needs: [set-version, setup]
     steps:
