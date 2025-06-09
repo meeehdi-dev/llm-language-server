@@ -21,8 +21,8 @@ jobs:
         os: [darwin, linux, windows]
         arch: ["386", amd64, arm, arm64]
         exclude:
-          - goos: darwin
-            goarch: arm
+          - os: darwin
+            arch: arm
     runs-on: ubuntu-latest
     needs: [set-version, setup]
     steps:
