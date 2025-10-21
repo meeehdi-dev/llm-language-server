@@ -19,8 +19,8 @@ type TextDocumentSyncKind int
 
 const (
 	None        TextDocumentSyncKind = 0
-	Full                             = 1
-	Incremental                      = 2
+	Full        TextDocumentSyncKind = 1
+	Incremental TextDocumentSyncKind = 2
 )
 
 type ServerCapabilities struct {
