@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"llm-language-server/lsp"
@@ -17,7 +16,6 @@ type OllamaModelParams struct {
 	NumPredict  int      `json:"num_predict"`
 	Temperature int      `json:"temperature"`
 	TopP        float32  `json:"top_p"`
-	MaxTokens   int      `json:"max_tokens"`
 	Stop        []string `json:"stop"`
 }
 
@@ -138,7 +136,6 @@ func (p *OllamaProvider) preloadModel() error {
 			"num_predict": p.ModelParams.NumPredict,
 			"temperature": p.ModelParams.Temperature,
 			"top_p":       p.ModelParams.TopP,
-			"max_tokens":  p.ModelParams.MaxTokens,
 			"stop":        p.ModelParams.Stop,
 		},
 		"keep_alive": "1h",
@@ -272,7 +269,7 @@ func (p *OllamaProvider) Generate(ctx context.Context, params lsp.InlineCompleti
 
 	document, exists := lsp.State[string(params.TextDocument.Uri)]
 	if !exists {
-		return items, errors.New(fmt.Sprintf("document not found %s", params.TextDocument.Uri))
+		return items, fmt.Errorf("document not found %s", params.TextDocument.Uri)
 	}
 
 	index := lsp.FindIndex(document.Text, params.Position.Line, params.Position.Character)
@@ -290,7 +287,6 @@ func (p *OllamaProvider) Generate(ctx context.Context, params lsp.InlineCompleti
 			"num_predict": p.ModelParams.NumPredict,
 			"temperature": p.ModelParams.Temperature,
 			"top_p":       p.ModelParams.TopP,
-			"max_tokens":  p.ModelParams.MaxTokens,
 			"stop":        p.ModelParams.Stop,
 		},
 	}
