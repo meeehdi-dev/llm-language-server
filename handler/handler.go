@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"llm-language-server/lsp"
 	"llm-language-server/provider"
@@ -50,13 +49,27 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		if err != nil {
 			return err
 		}
-		var params lsp.DidOpenTextDocumentParams
+		var params lsp.TextDocumentParams
 		err = json.Unmarshal(jsonParams, &params)
 		if err != nil {
 			return err
 		}
 		lsp.SetState(params)
 		output := lsp.NewLogMesssage("textDocument/didOpen - OK", lsp.Info)
+		writer.Write(lsp.NewNotificationMessage(output))
+		return nil
+	case "textDocument/didFocus":
+		jsonParams, err := json.Marshal(request.Params)
+		if err != nil {
+			return err
+		}
+		var params lsp.TextDocumentParams
+		err = json.Unmarshal(jsonParams, &params)
+		if err != nil {
+			return err
+		}
+		lsp.SetState(params)
+		output := lsp.NewLogMesssage("textDocument/didFocus - OK", lsp.Info)
 		writer.Write(lsp.NewNotificationMessage(output))
 		return nil
 	case "textDocument/didChange":
@@ -78,6 +91,20 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		return nil
 	case "textDocument/didSave":
 		output := lsp.NewLogMesssage("textDocument/didSave - OK", lsp.Info)
+		writer.Write(lsp.NewNotificationMessage(output))
+		return nil
+	case "textDocument/didClose":
+		jsonParams, err := json.Marshal(request.Params)
+		if err != nil {
+			return err
+		}
+		var params lsp.TextDocumentParams
+		err = json.Unmarshal(jsonParams, &params)
+		if err != nil {
+			return err
+		}
+		lsp.DeleteState(params)
+		output := lsp.NewLogMesssage("textDocument/didClose - OK", lsp.Info)
 		writer.Write(lsp.NewNotificationMessage(output))
 		return nil
 	case "textDocument/inlineCompletion":
@@ -102,6 +129,13 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 			writer.Write(lsp.NewNotificationMessage(output))
 		}
 		output := lsp.NewInlineCompletionResponse(request.ID, lsp.InlineCompletionResult{Items: items})
+		if len(items) == 0 {
+			output := lsp.NewLogMesssage("textDocument/inlineCompletion - DEBUG: no items", lsp.Debug)
+			writer.Write(lsp.NewNotificationMessage(output))
+		} else {
+			output := lsp.NewLogMesssage(fmt.Sprintf("textDocument/inlineCompletion - DEBUG: %s", items[0].InsertText), lsp.Debug)
+			writer.Write(lsp.NewNotificationMessage(output))
+		}
 		writer.Write(lsp.NewResponseMessage(output))
 		return nil
 	case "$/cancelRequest":
@@ -123,5 +157,5 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		return nil
 	}
 
-	return errors.New(fmt.Sprintf("handler not found: %s", request.Method))
+	return fmt.Errorf("handler not found: %s", request.Method)
 }

@@ -1,7 +1,6 @@
 package lsp
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -16,6 +15,17 @@ type Position struct {
 	Character int `json:"character"`
 }
 
+type TextDocumentItem struct {
+	Uri        DocumentUri `json:"uri"`
+	LanguageId string      `json:"languageId"`
+	Version    int         `json:"version"`
+	Text       string      `json:"text"`
+}
+
+type TextDocumentParams struct {
+	TextDocument TextDocumentItem `json:"textDocument"`
+}
+
 type TextDocumentPositionParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument"`
 	Position     Position               `json:"position"`
@@ -28,11 +38,15 @@ type TextDocument struct {
 
 var State = make(map[string]TextDocument)
 
-func SetState(params DidOpenTextDocumentParams) {
+func SetState(params TextDocumentParams) {
 	State[string(params.TextDocument.Uri)] = TextDocument{
 		Version: params.TextDocument.Version,
 		Text:    params.TextDocument.Text,
 	}
+}
+
+func DeleteState(params TextDocumentParams) {
+	delete(State, string(params.TextDocument.Uri))
 }
 
 func FindIndex(text string, line int, col int) int {
@@ -52,10 +66,10 @@ func FindIndex(text string, line int, col int) int {
 func UpdateState(params DidChangeTextDocumentParams) error {
 	current, exists := State[string(params.TextDocument.Uri)]
 	if !exists {
-		return errors.New(fmt.Sprintf("Document not found: %s", params.TextDocument.Uri))
+		return fmt.Errorf("Document not found: %s", params.TextDocument.Uri)
 	}
 	if current.Version > params.TextDocument.Version {
-		return errors.New(fmt.Sprintf("version mismatch: current (%d) > new (%d)", current.Version, params.TextDocument.Version))
+		return fmt.Errorf("version mismatch: current (%d) > new (%d)", current.Version, params.TextDocument.Version)
 	}
 
 	for _, change := range params.ContentChanges {
@@ -65,7 +79,7 @@ func UpdateState(params DidChangeTextDocumentParams) error {
 	}
 
 	// NOTE: dont like it but whatever
-	SetState(DidOpenTextDocumentParams{TextDocument: TextDocumentItem{Uri: params.TextDocument.Uri, Text: current.Text, Version: params.TextDocument.Version}})
+	SetState(TextDocumentParams{TextDocument: TextDocumentItem{Uri: params.TextDocument.Uri, Text: current.Text, Version: params.TextDocument.Version}})
 
 	return nil
 }
