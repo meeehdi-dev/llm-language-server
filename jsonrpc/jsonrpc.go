@@ -3,7 +3,6 @@ package jsonrpc
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strconv"
 )
@@ -19,7 +18,7 @@ func EncodeMessage(message any) string {
 func DecodeMessage(input []byte) ([]byte, error) {
 	header, content, found := bytes.Cut(input, []byte("\r\n\r\n"))
 	if !found {
-		return nil, errors.New("invalid message format")
+		return nil, fmt.Errorf("invalid message format")
 	}
 
 	contentLengthBytes := header[len("Content-Length: "):]

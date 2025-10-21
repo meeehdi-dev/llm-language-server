@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"llm-language-server/lsp"
@@ -67,12 +66,12 @@ func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompl
 	items := make([]lsp.CompletionItem, 0)
 
 	if p.ApiKey == "" {
-		return items, errors.New("api key not set")
+		return items, fmt.Errorf("api key not set")
 	}
 
 	document, exists := lsp.State[string(params.TextDocument.Uri)]
 	if !exists {
-		return items, errors.New(fmt.Sprintf("document not found %s", params.TextDocument.Uri))
+		return items, fmt.Errorf("document not found %s", params.TextDocument.Uri)
 	}
 
 	index := lsp.FindIndex(document.Text, params.Position.Line, params.Position.Character)

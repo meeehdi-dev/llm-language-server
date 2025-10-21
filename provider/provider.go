@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"llm-language-server/lsp"
 )
@@ -24,5 +23,5 @@ func Initialize(options lsp.InitializationOptions, params any) error {
 		return CurrentProvider.Initialize(params)
 	}
 
-	return errors.New(fmt.Sprintf("invalid provider %s", options.Provider))
+	return fmt.Errorf("invalid provider %s", options.Provider)
 }
