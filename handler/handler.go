@@ -11,9 +11,22 @@ import (
 
 var reqCancel = make(map[int]func())
 
-func HandleRequestMessage(writer *os.File, message []byte) error {
+func handleGenerate(request lsp.RequestMessage, params lsp.InlineCompletionParams, writer *os.File) {
 	var ctx, cancel = context.WithCancel(context.Background())
 	defer cancel()
+
+	reqCancel[request.ID] = cancel
+	items, err := provider.CurrentProvider.Generate(ctx, params)
+	delete(reqCancel, request.ID)
+	if err != nil {
+		output := lsp.NewLogMesssage(fmt.Sprintf("textDocument/inlineCompletion - ERROR: %s", err.Error()), lsp.Error)
+		writer.Write(lsp.NewNotificationMessage(output))
+	}
+	output := lsp.NewInlineCompletionResponse(request.ID, lsp.InlineCompletionResult{Items: items})
+	writer.Write(lsp.NewResponseMessage(output))
+}
+
+func HandleRequestMessage(writer *os.File, message []byte) error {
 
 	var request lsp.RequestMessage
 	err := json.Unmarshal(message, &request)
@@ -116,22 +129,7 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		if err != nil {
 			return err
 		}
-		reqCancel[request.ID] = cancel
-		items, err := provider.CurrentProvider.Generate(ctx, params)
-		delete(reqCancel, request.ID)
-		if err != nil {
-			output := lsp.NewLogMesssage(fmt.Sprintf("textDocument/inlineCompletion - ERROR: %s", err.Error()), lsp.Error)
-			writer.Write(lsp.NewNotificationMessage(output))
-		}
-		output := lsp.NewInlineCompletionResponse(request.ID, lsp.InlineCompletionResult{Items: items})
-		if len(items) == 0 {
-			output := lsp.NewLogMesssage("textDocument/inlineCompletion - DEBUG: no items", lsp.Debug)
-			writer.Write(lsp.NewNotificationMessage(output))
-		} else {
-			output := lsp.NewLogMesssage(fmt.Sprintf("textDocument/inlineCompletion - DEBUG: %s", items[0].InsertText), lsp.Debug)
-			writer.Write(lsp.NewNotificationMessage(output))
-		}
-		writer.Write(lsp.NewResponseMessage(output))
+		go handleGenerate(request, params, writer)
 		return nil
 	case "$/cancelRequest":
 		jsonParams, err := json.Marshal(request.Params)
