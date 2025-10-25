@@ -9,8 +9,7 @@ import (
 	"os"
 )
 
-var generateRequest = -1
-var generateCancel context.CancelFunc = nil
+var reqCancel = make(map[int]func())
 
 func HandleRequestMessage(writer *os.File, message []byte) error {
 	var ctx, cancel = context.WithCancel(context.Background())
@@ -117,12 +116,6 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		if err != nil {
 			return err
 		}
-		if generateRequest != -1 {
-			generateCancel()
-			generateRequest = -1
-		}
-		generateRequest = request.ID
-		generateCancel = cancel
 		items, err := provider.CurrentProvider.Generate(ctx, params)
 		if err != nil {
 			output := lsp.NewLogMesssage(fmt.Sprintf("textDocument/inlineCompletion - ERROR: %s", err.Error()), lsp.Error)
@@ -148,10 +141,11 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		if err != nil {
 			return err
 		}
-		if generateRequest == params.ID {
-			generateCancel()
-			generateRequest = -1
+		c, exists := reqCancel[params.ID]
+		if !exists {
+			return fmt.Errorf("$/cancelRequest - Request %d not found", params.ID)
 		}
+		c()
 		output := lsp.NewLogMesssage("$/cancelRequest - OK", lsp.Info)
 		writer.Write(lsp.NewNotificationMessage(output))
 		return nil
