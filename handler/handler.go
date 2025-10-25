@@ -116,7 +116,9 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		if err != nil {
 			return err
 		}
+		reqCancel[request.ID] = cancel
 		items, err := provider.CurrentProvider.Generate(ctx, params)
+		delete(reqCancel, request.ID)
 		if err != nil {
 			output := lsp.NewLogMesssage(fmt.Sprintf("textDocument/inlineCompletion - ERROR: %s", err.Error()), lsp.Error)
 			writer.Write(lsp.NewNotificationMessage(output))
