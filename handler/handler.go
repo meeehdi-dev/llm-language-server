@@ -146,6 +146,7 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 			return fmt.Errorf("$/cancelRequest - Request %d not found", params.ID)
 		}
 		c()
+		delete(reqCancel, params.ID)
 		output := lsp.NewLogMesssage("$/cancelRequest - OK", lsp.Info)
 		writer.Write(lsp.NewNotificationMessage(output))
 		return nil
