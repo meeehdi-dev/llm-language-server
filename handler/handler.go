@@ -21,9 +21,12 @@ func handleGenerate(request lsp.RequestMessage, params lsp.InlineCompletionParam
 	if err != nil {
 		output := lsp.NewLogMesssage(fmt.Sprintf("textDocument/inlineCompletion - ERROR: %s", err.Error()), lsp.Error)
 		writer.Write(lsp.NewNotificationMessage(output))
+		return
 	}
 	output := lsp.NewInlineCompletionResponse(request.ID, lsp.InlineCompletionResult{Items: items})
 	writer.Write(lsp.NewResponseMessage(output))
+	logOutput := lsp.NewLogMesssage("textDocument/inlineCompletion - OK", lsp.Info)
+	writer.Write(lsp.NewNotificationMessage(logOutput))
 }
 
 func HandleRequestMessage(writer *os.File, message []byte) error {
