@@ -24,7 +24,8 @@ const (
 )
 
 type ServerCapabilities struct {
-	TextDocumentSync TextDocumentSyncKind `json:"textDocumentSync"`
+	TextDocumentSync         TextDocumentSyncKind `json:"textDocumentSync"`
+	InlineCompletionProvider bool                 `json:"inlineCompletionProvider"`
 }
 
 type ServerInfo struct {
@@ -44,7 +45,7 @@ func NewInitializeResponse(id int) ResponseMessage {
 		},
 		ID: id,
 		Result: InitializeResult{
-			Capabilities: ServerCapabilities{TextDocumentSync: Incremental},
+			Capabilities: ServerCapabilities{TextDocumentSync: Incremental, InlineCompletionProvider: true},
 			ServerInfo: ServerInfo{
 				Name:    "llm-language-server",
 				Version: "1.0.0-0",
