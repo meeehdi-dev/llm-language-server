@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"crypto/sha256"
 	"llm-language-server/lsp"
 	"time"
 )
@@ -24,19 +23,12 @@ func checkExpiredKeys() {
 	}
 }
 
-func getKey(prompt string, suffix string) string {
-	cacheKeyHash := sha256.New()
-	cacheKeyHash.Write([]byte(prompt + "_" + suffix))
-	return string(cacheKeyHash.Sum(nil))
-}
-
 func Set(prompt string, suffix string, value []lsp.CompletionItem) {
 	if !started {
 		return
 	}
 
-	key := getKey(prompt, suffix)
-	cacheMap[key] = CacheValue{Data: value, Ex: time.Now().Add(ex)}
+	cacheMap[prompt+suffix] = CacheValue{Data: value, Ex: time.Now().Add(ex)}
 }
 
 func Get(prompt string, suffix string) ([]lsp.CompletionItem, bool) {
@@ -44,8 +36,7 @@ func Get(prompt string, suffix string) ([]lsp.CompletionItem, bool) {
 		return nil, false
 	}
 
-	key := getKey(prompt, suffix)
-	value, exists := cacheMap[key]
+	value, exists := cacheMap[prompt+suffix]
 
 	if exists {
 		return value.Data, true
