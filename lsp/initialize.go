@@ -8,6 +8,7 @@ type ClientInfo struct {
 type InitializationOptions struct {
 	Provider string `json:"provider"`
 	Params   any    `json:"params"`
+	Cache    *bool  `json:"cache,omitempty"`
 }
 
 type InitializeParams struct {

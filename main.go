@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"llm-language-server/cache"
 	"llm-language-server/handler"
 	"llm-language-server/jsonrpc"
 	"llm-language-server/lsp"
@@ -27,8 +26,6 @@ func main() {
 
 	writer := os.Stdout
 	writer.Write(lsp.NewNotificationMessage(lsp.NewLogMesssage(fmt.Sprintf("Successfully started! (debug: %t)", *debug), lsp.Info)))
-
-	go cache.Init()
 
 	for scanner.Scan() {
 		bytes := scanner.Bytes()

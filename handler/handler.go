@@ -53,6 +53,9 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		if err != nil {
 			return err
 		}
+		if params.InitializationOptions.Cache == nil || *params.InitializationOptions.Cache != false {
+			go cache.Init()
+		}
 		output := lsp.NewInitializeResponse(request.ID)
 		writer.Write(lsp.NewResponseMessage(output))
 		return nil

@@ -2,9 +2,7 @@ package cache
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"llm-language-server/lsp"
-	"strings"
 	"time"
 )
 
@@ -13,8 +11,10 @@ type CacheValue struct {
 	Ex   time.Time
 }
 
-var cacheMap = make(map[string]CacheValue)
-var EX = 60 * time.Second
+var cacheMap map[string]CacheValue
+var started = false
+
+var ex = 60 * time.Second
 
 func checkExpiredKeys() {
 	for key, value := range cacheMap {
@@ -25,41 +25,45 @@ func checkExpiredKeys() {
 }
 
 func getKey(prompt string, suffix string) string {
-	cacheKey := fmt.Sprintf("%s<FIM_MIDDLE>%s", prompt, suffix)
 	cacheKeyHash := sha256.New()
-	cacheKeyHash.Write([]byte(cacheKey))
+	cacheKeyHash.Write([]byte(prompt + "_" + suffix))
 	return string(cacheKeyHash.Sum(nil))
 }
 
 func Set(prompt string, suffix string, value []lsp.CompletionItem) {
-	key := getKey(prompt, suffix)
-	cacheMap[key] = CacheValue{Data: value, Ex: time.Now().Add(EX)}
-	for _, item := range value {
-		chars := strings.Split(item.InsertText, "")
-		pendingLine := ""
-		for _, char := range chars {
-			pendingLine += char
-			item.InsertText = item.InsertText[1:]
-			pendingKey := getKey(prompt+pendingLine, suffix)
-			cacheMap[pendingKey] = CacheValue{Data: []lsp.CompletionItem{item}, Ex: time.Now().Add(EX)}
-		}
+	if !started {
+		return
 	}
+
+	key := getKey(prompt, suffix)
+	cacheMap[key] = CacheValue{Data: value, Ex: time.Now().Add(ex)}
 }
 
 func Get(prompt string, suffix string) ([]lsp.CompletionItem, bool) {
+	if !started {
+		return nil, false
+	}
+
 	key := getKey(prompt, suffix)
 	value, exists := cacheMap[key]
 
 	if exists {
-		return value.Data, exists
+		return value.Data, true
 	} else {
-		return nil, exists
+		return nil, false
 	}
+}
+
+func Reset() {
+	cacheMap = make(map[string]CacheValue)
 }
 
 var ticker *time.Ticker
 
 func Init() {
+	Reset()
+	started = true
+
 	ticker = time.NewTicker(time.Second)
 	defer ticker.Stop()
 
@@ -75,8 +79,4 @@ func Shutdown() {
 	if ticker != nil {
 		ticker.Stop()
 	}
-}
-
-func Reset() {
-	cacheMap = make(map[string]CacheValue)
 }
