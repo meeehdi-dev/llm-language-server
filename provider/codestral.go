@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"llm-language-server/cache"
 	"llm-language-server/lsp"
 	"net/http"
 	"strconv"
@@ -75,6 +76,14 @@ func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompl
 	}
 
 	index := lsp.FindIndex(document.Text, params.Position.Line, params.Position.Character)
+	prompt := document.Text[:index]
+	suffix := document.Text[index:]
+
+	cacheKey := cache.GetKey(prompt, suffix)
+	cacheValue, exists := cache.Get(cacheKey)
+	if exists {
+		return cacheValue, nil
+	}
 
 	data := map[string]any{
 		"model":       "codestral-latest",
@@ -123,6 +132,8 @@ func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompl
 	for _, choice := range response.Choices {
 		items = append(items, lsp.CompletionItem{Label: strconv.Itoa(choice.Index), InsertText: choice.Message.Content})
 	}
+
+	cache.Set(cacheKey, items)
 
 	return items, nil
 }

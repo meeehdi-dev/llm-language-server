@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"llm-language-server/cache"
 	"llm-language-server/lsp"
 	"llm-language-server/provider"
 	"os"
@@ -144,16 +145,25 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		if err != nil {
 			return err
 		}
-		c, exists := reqCancel[params.ID]
+		cancel, exists := reqCancel[params.ID]
 		if !exists {
 			return fmt.Errorf("$/cancelRequest - Request %d not found", params.ID)
 		}
-		c()
+		cancel()
 		delete(reqCancel, params.ID)
 		output := lsp.NewLogMesssage("$/cancelRequest - OK", lsp.Info)
 		writer.Write(lsp.NewNotificationMessage(output))
 		return nil
+	case "shutdown":
+		cache.Shutdown()
+		for key, cancel := range reqCancel {
+			cancel()
+			delete(reqCancel, key)
+		}
+		output := lsp.NewLogMesssage("shutdown - OK", lsp.Info)
+		writer.Write(lsp.NewNotificationMessage(output))
+		return nil
 	}
 
-	return fmt.Errorf("handler not found: %s", request.Method)
+	return fmt.Errorf("handler not found: '%s'", request.Method)
 }

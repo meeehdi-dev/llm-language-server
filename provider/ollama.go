@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"llm-language-server/cache"
 	"llm-language-server/lsp"
 	"net/http"
 	"strings"
@@ -273,8 +274,13 @@ func (p *OllamaProvider) Generate(ctx context.Context, params lsp.InlineCompleti
 	}
 
 	index := lsp.FindIndex(document.Text, params.Position.Line, params.Position.Character)
-
 	prompt, suffix := truncate(document.Text, index, p.ModelParams.NumCtx)
+
+	cacheKey := cache.GetKey(prompt, suffix)
+	cacheValue, exists := cache.Get(cacheKey)
+	if exists {
+		return cacheValue, nil
+	}
 
 	// TODO: handle stream true + lsp progress?
 	data := map[string]any{
@@ -328,6 +334,8 @@ func (p *OllamaProvider) Generate(ctx context.Context, params lsp.InlineCompleti
 	if response.Done {
 		items = append(items, lsp.CompletionItem{Label: "0", InsertText: response.Response})
 	}
+
+	cache.Set(cacheKey, items)
 
 	return items, nil
 }
