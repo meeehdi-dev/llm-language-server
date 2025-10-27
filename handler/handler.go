@@ -133,6 +133,9 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		if err != nil {
 			return err
 		}
+		if params.Context.TriggerKind == lsp.Invoked {
+			cache.Reset()
+		}
 		go handleGenerate(request, params, writer)
 		return nil
 	case "$/cancelRequest":
@@ -156,9 +159,8 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		return nil
 	case "shutdown":
 		cache.Shutdown()
-		for key, cancel := range reqCancel {
+		for _, cancel := range reqCancel {
 			cancel()
-			delete(reqCancel, key)
 		}
 		output := lsp.NewLogMesssage("shutdown - OK", lsp.Info)
 		writer.Write(lsp.NewNotificationMessage(output))

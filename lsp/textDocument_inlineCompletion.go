@@ -1,8 +1,15 @@
 package lsp
 
+type TriggerKind int
+
+const (
+	Invoked   = 1
+	Automatic = 2
+)
+
 type CompletionContext struct {
-	TriggerKind      int    `json:"triggerKind"`
-	TriggerCharacter string `json:"triggerCharacter"`
+	TriggerKind      TriggerKind `json:"triggerKind"`
+	TriggerCharacter string      `json:"triggerCharacter"`
 }
 
 type InlineCompletionParams struct {

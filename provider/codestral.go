@@ -79,8 +79,7 @@ func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompl
 	prompt := document.Text[:index]
 	suffix := document.Text[index:]
 
-	cacheKey := cache.GetKey(prompt, suffix)
-	cacheValue, exists := cache.Get(cacheKey)
+	cacheValue, exists := cache.Get(prompt, suffix)
 	if exists {
 		return cacheValue, nil
 	}
@@ -133,7 +132,7 @@ func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompl
 		items = append(items, lsp.CompletionItem{Label: strconv.Itoa(choice.Index), InsertText: choice.Message.Content})
 	}
 
-	cache.Set(cacheKey, items)
+	cache.Set(prompt, suffix, items)
 
 	return items, nil
 }

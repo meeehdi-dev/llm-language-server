@@ -276,8 +276,7 @@ func (p *OllamaProvider) Generate(ctx context.Context, params lsp.InlineCompleti
 	index := lsp.FindIndex(document.Text, params.Position.Line, params.Position.Character)
 	prompt, suffix := truncate(document.Text, index, p.ModelParams.NumCtx)
 
-	cacheKey := cache.GetKey(prompt, suffix)
-	cacheValue, exists := cache.Get(cacheKey)
+	cacheValue, exists := cache.Get(prompt, suffix)
 	if exists {
 		return cacheValue, nil
 	}
@@ -335,7 +334,7 @@ func (p *OllamaProvider) Generate(ctx context.Context, params lsp.InlineCompleti
 		items = append(items, lsp.CompletionItem{Label: "0", InsertText: response.Response})
 	}
 
-	cache.Set(cacheKey, items)
+	cache.Set(prompt, suffix, items)
 
 	return items, nil
 }
