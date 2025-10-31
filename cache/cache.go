@@ -49,7 +49,9 @@ func Get(prompt string, suffix string) ([]lsp.CompletionItem, bool) {
 				clonedData := make([]lsp.CompletionItem, len(value.Data))
 				for i, item := range value.Data {
 					clonedItem := item
-					clonedItem.InsertText = item.InsertText[len(prompt)-len(value.Prompt):]
+					start := max(len(prompt)-len(value.Prompt), 0)
+					end := min(len(item.InsertText)-(len(suffix)-len(value.Suffix)), len(item.InsertText))
+					clonedItem.InsertText = item.InsertText[start:end]
 					clonedData[i] = clonedItem
 				}
 				return clonedData, true
