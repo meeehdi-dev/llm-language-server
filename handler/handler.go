@@ -77,20 +77,6 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		output := lsp.NewLogMesssage("textDocument/didOpen - OK", lsp.Info)
 		writer.Write(lsp.NewNotificationMessage(output))
 		return nil
-	case "textDocument/didFocus":
-		jsonParams, err := json.Marshal(request.Params)
-		if err != nil {
-			return err
-		}
-		var params lsp.TextDocumentParams
-		err = json.Unmarshal(jsonParams, &params)
-		if err != nil {
-			return err
-		}
-		lsp.SetState(params)
-		output := lsp.NewLogMesssage("textDocument/didFocus - OK", lsp.Info)
-		writer.Write(lsp.NewNotificationMessage(output))
-		return nil
 	case "textDocument/didChange":
 		jsonParams, err := json.Marshal(request.Params)
 		if err != nil {
