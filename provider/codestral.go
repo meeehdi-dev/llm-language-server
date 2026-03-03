@@ -10,10 +10,13 @@ import (
 	"llm-language-server/lsp"
 	"net/http"
 	"strconv"
+	"sync"
 )
 
 type CodestralProvider struct {
-	ApiKey string
+	ApiKey   string
+	endpoint string
+	mutex       sync.RWMutex
 }
 
 type CodestralInitializationParams struct {
@@ -63,6 +66,45 @@ type CodestralResponse struct {
 	Usage   CodestralUsage    `json:"usage"`
 }
 
+func (p *CodestralProvider) getEndpoint(ctx context.Context) (string, error) {
+	p.mutex.RLock()
+	if p.endpoint != "" {
+		endpoint := p.endpoint
+		p.mutex.RUnlock()
+		return endpoint, nil
+	}
+	p.mutex.RUnlock()
+
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
+	// Double-check after acquiring the write lock
+	if p.endpoint != "" {
+		return p.endpoint, nil
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "GET", "https://api.mistral.ai/v1/models", nil)
+	if err != nil {
+		return "", fmt.Errorf("creating check request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+p.ApiKey)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("checking api key type: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 401 {
+		p.endpoint = "https://codestral.mistral.ai/v1/fim/completions"
+	} else {
+		p.endpoint = "https://api.mistral.ai/v1/fim/completions"
+	}
+
+	return p.endpoint, nil
+}
+
 func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompletionParams) ([]lsp.CompletionItem, error) {
 	items := make([]lsp.CompletionItem, 0)
 
@@ -98,7 +140,12 @@ func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompl
 		return items, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", "https://codestral.mistral.ai/v1/fim/completions", bytes.NewBuffer(jsonData))
+	endpoint, err := p.getEndpoint(ctx)
+	if err != nil {
+		return items, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", endpoint, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return items, err
 	}
