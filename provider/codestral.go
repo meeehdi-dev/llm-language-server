@@ -16,7 +16,7 @@ import (
 type CodestralProvider struct {
 	ApiKey   string
 	endpoint string
-	mutex       sync.RWMutex
+	mutex    sync.RWMutex
 }
 
 type CodestralInitializationParams struct {

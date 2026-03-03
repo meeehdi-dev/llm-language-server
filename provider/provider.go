@@ -15,6 +15,9 @@ var CurrentProvider Provider = nil
 
 func Initialize(options lsp.InitializationOptions, params any) error {
 	switch options.Provider {
+	case "gemini":
+		CurrentProvider = &GeminiProvider{}
+		return CurrentProvider.Initialize(params)
 	case "codestral":
 		CurrentProvider = &CodestralProvider{}
 		return CurrentProvider.Initialize(params)
