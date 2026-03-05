@@ -21,6 +21,9 @@ func Initialize(options lsp.InitializationOptions, params any) error {
 	case "codestral":
 		CurrentProvider = &CodestralProvider{}
 		return CurrentProvider.Initialize(params)
+	case "mistral":
+		CurrentProvider = &MistralProvider{}
+		return CurrentProvider.Initialize(params)
 	case "ollama":
 		CurrentProvider = &OllamaProvider{}
 		return CurrentProvider.Initialize(params)

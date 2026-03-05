@@ -12,44 +12,44 @@ import (
 	"strconv"
 )
 
-type CodestralProvider struct {
+type MistralProvider struct {
 	ApiKey   string
 }
 
-type CodestralInitializationParams struct {
+type MistralInitializationParams struct {
 	ApiKey string `json:"api_key"`
 }
 
-func (p *CodestralProvider) Initialize(params any) error {
+func (p *MistralProvider) Initialize(params any) error {
 	jsonParams, err := json.Marshal(params)
 	if err != nil {
 		return err
 	}
-	var codestralParams CodestralInitializationParams
-	err = json.Unmarshal(jsonParams, &codestralParams)
+	var mistralParams MistralInitializationParams
+	err = json.Unmarshal(jsonParams, &mistralParams)
 	if err != nil {
 		return err
 	}
 
-	p.ApiKey = codestralParams.ApiKey
+	p.ApiKey = mistralParams.ApiKey
 
 	return nil
 }
 
-type CodestralMessage struct {
+type MistralMessage struct {
 	Content   string `json:"content"`
 }
 
-type CodestralChoice struct {
+type MistralChoice struct {
 	Index        int              `json:"index"`
-	Message      CodestralMessage `json:"message"`
+	Message      MistralMessage `json:"message"`
 }
 
-type CodestralResponse struct {
-	Choices []CodestralChoice `json:"choices"`
+type MistralResponse struct {
+	Choices []MistralChoice `json:"choices"`
 }
 
-func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompletionParams) ([]lsp.CompletionItem, error) {
+func (p *MistralProvider) Generate(ctx context.Context, params lsp.InlineCompletionParams) ([]lsp.CompletionItem, error) {
 	items := make([]lsp.CompletionItem, 0)
 
 	if p.ApiKey == "" {
@@ -84,7 +84,7 @@ func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompl
 		return items, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "POST", "https://codestral.mistral.ai/v1/fim/completions", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequestWithContext(ctx, "POST", "https://api.mistral.ai/v1/fim/completions", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return items, err
 	}
@@ -108,7 +108,7 @@ func (p *CodestralProvider) Generate(ctx context.Context, params lsp.InlineCompl
 		return items, err
 	}
 
-	var response CodestralResponse
+	var response MistralResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return items, err
