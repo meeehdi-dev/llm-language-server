@@ -32,20 +32,34 @@ type TextDocumentPositionParams struct {
 }
 
 type TextDocument struct {
-	Version int
-	Text    string
+	Uri        DocumentUri
+	LanguageId string
+	Version    int
+	Text       string
 }
 
 var State = make(map[string]TextDocument)
+var RecentlyClosedFiles = make([]TextDocument, 0)
+var ServerWorkspaceFolder string
 
 func SetState(params TextDocumentParams) {
 	State[string(params.TextDocument.Uri)] = TextDocument{
-		Version: params.TextDocument.Version,
-		Text:    params.TextDocument.Text,
+		Uri:        params.TextDocument.Uri,
+		LanguageId: params.TextDocument.LanguageId,
+		Version:    params.TextDocument.Version,
+		Text:       params.TextDocument.Text,
 	}
 }
 
 func DeleteState(params TextDocumentParams) {
+	doc, exists := State[string(params.TextDocument.Uri)]
+	if exists {
+		// Maintain max size 5
+		if len(RecentlyClosedFiles) >= 5 {
+			RecentlyClosedFiles = RecentlyClosedFiles[1:]
+		}
+		RecentlyClosedFiles = append(RecentlyClosedFiles, doc)
+	}
 	delete(State, string(params.TextDocument.Uri))
 }
 
@@ -79,7 +93,12 @@ func UpdateState(params DidChangeTextDocumentParams) error {
 	}
 
 	// NOTE: dont like it but whatever
-	SetState(TextDocumentParams{TextDocument: TextDocumentItem{Uri: params.TextDocument.Uri, Text: current.Text, Version: params.TextDocument.Version}})
+	SetState(TextDocumentParams{TextDocument: TextDocumentItem{
+		Uri:        params.TextDocument.Uri,
+		LanguageId: current.LanguageId,
+		Text:       current.Text,
+		Version:    params.TextDocument.Version,
+	}})
 
 	return nil
 }

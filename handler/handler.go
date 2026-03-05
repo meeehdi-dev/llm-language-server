@@ -49,6 +49,14 @@ func HandleRequestMessage(writer *os.File, message []byte) error {
 		if err != nil {
 			return err
 		}
+		if len(params.WorkspaceFolders) > 0 {
+			lsp.ServerWorkspaceFolder = params.WorkspaceFolders[0].Uri
+		} else if params.RootUri != nil {
+			lsp.ServerWorkspaceFolder = *params.RootUri
+		} else if params.RootPath != nil {
+			lsp.ServerWorkspaceFolder = *params.RootPath
+		}
+
 		err = provider.Initialize(params.InitializationOptions, params.InitializationOptions.Params)
 		if err != nil {
 			return err

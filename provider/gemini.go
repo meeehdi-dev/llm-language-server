@@ -9,6 +9,9 @@ import (
 	"llm-language-server/cache"
 	"llm-language-server/lsp"
 	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -87,18 +90,63 @@ func (p *GeminiProvider) Generate(ctx context.Context, params lsp.InlineCompleti
 		return cacheValue, nil
 	}
 
+	var contextBlock strings.Builder
+
+	// 1. Project Metadata
+	if lsp.ServerWorkspaceFolder != "" {
+		var rootPath string
+		if strings.HasPrefix(lsp.ServerWorkspaceFolder, "file://") {
+			parsedUrl, err := url.Parse(lsp.ServerWorkspaceFolder)
+			if err == nil {
+				rootPath = parsedUrl.Path
+			}
+		} else {
+			rootPath = lsp.ServerWorkspaceFolder
+		}
+
+		if rootPath != "" {
+			metaFiles := []string{"package.json", "go.mod", "requirements.txt", "Cargo.toml"}
+			for _, file := range metaFiles {
+				filePath := filepath.Join(rootPath, file)
+				content, err := os.ReadFile(filePath)
+				if err == nil {
+					contextBlock.WriteString(fmt.Sprintf("\n--- PROJECT METADATA: %s ---\n%s\n", file, string(content)))
+				}
+			}
+		}
+	}
+
+	// 2. Open Files
+	for uri, doc := range lsp.State {
+		if uri != string(params.TextDocument.Uri) {
+			contextBlock.WriteString(fmt.Sprintf("\n--- OPEN FILE: %s ---\n%s\n", uri, doc.Text))
+		}
+	}
+
+	// 3. Recently Closed Files
+	for _, doc := range lsp.RecentlyClosedFiles {
+		if string(doc.Uri) != string(params.TextDocument.Uri) {
+			contextBlock.WriteString(fmt.Sprintf("\n--- RECENTLY CLOSED FILE: %s ---\n%s\n", doc.Uri, doc.Text))
+		}
+	}
+
+	langContext := ""
+	if document.LanguageId != "" {
+		langContext = fmt.Sprintf("You are completing code for a %s file.\n", document.LanguageId)
+	}
+
 	prompt := fmt.Sprintf(`You are an expert software engineer providing inline code completion. 
-Below is a file currently being edited. The cursor position is marked with <CURSOR>.
+%sBelow is a file currently being edited. The cursor position is marked with <CURSOR>.
 Please provide the code that should replace the <CURSOR> marker to complete the code accurately.
 
 CRITICAL INSTRUCTIONS:
 - Return ONLY the exact code completion that goes in place of <CURSOR>.
 - Do NOT include any conversational text or explanations.
-- Do NOT wrap the code in markdown code blocks (e.g., no `+"``` ... ```"+`).
+- Do NOT wrap the code in markdown code blocks (e.g., no %s).
 - Do NOT repeat the code before or after the <CURSOR>.
-
+%s
 FILE CONTENT:
-%s<CURSOR>%s`, promptText, suffixText)
+%s<CURSOR>%s`, langContext, "``` ... ```", contextBlock.String(), promptText, suffixText)
 
 	reqData := GeminiRequest{
 		Contents: []GeminiContent{

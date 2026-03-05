@@ -11,9 +11,17 @@ type InitializationOptions struct {
 	Cache    *bool  `json:"cache,omitempty"`
 }
 
+type WorkspaceFolder struct {
+	Uri  string `json:"uri"`
+	Name string `json:"name"`
+}
+
 type InitializeParams struct {
 	ClientInfo            ClientInfo            `json:"clientInfo"`
 	InitializationOptions InitializationOptions `json:"initializationOptions"`
+	RootUri               *string               `json:"rootUri"`
+	RootPath              *string               `json:"rootPath"`
+	WorkspaceFolders      []WorkspaceFolder     `json:"workspaceFolders"`
 }
 
 type TextDocumentSyncKind int
