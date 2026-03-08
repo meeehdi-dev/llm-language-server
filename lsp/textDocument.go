@@ -39,7 +39,6 @@ type TextDocument struct {
 }
 
 var State = make(map[string]TextDocument)
-var RecentlyClosedFiles = make([]TextDocument, 0)
 var ServerWorkspaceFolder string
 
 func SetState(params TextDocumentParams) {
@@ -52,14 +51,6 @@ func SetState(params TextDocumentParams) {
 }
 
 func DeleteState(params TextDocumentParams) {
-	doc, exists := State[string(params.TextDocument.Uri)]
-	if exists {
-		// Maintain max size 5
-		if len(RecentlyClosedFiles) >= 5 {
-			RecentlyClosedFiles = RecentlyClosedFiles[1:]
-		}
-		RecentlyClosedFiles = append(RecentlyClosedFiles, doc)
-	}
 	delete(State, string(params.TextDocument.Uri))
 }
 

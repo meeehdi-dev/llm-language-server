@@ -123,13 +123,6 @@ func (p *GeminiProvider) Generate(ctx context.Context, params lsp.InlineCompleti
 		}
 	}
 
-	// 3. Recently Closed Files
-	for _, doc := range lsp.RecentlyClosedFiles {
-		if string(doc.Uri) != string(params.TextDocument.Uri) {
-			contextBlock.WriteString(fmt.Sprintf("\n--- RECENTLY CLOSED FILE: %s ---\n%s\n", doc.Uri, doc.Text))
-		}
-	}
-
 	langContext := ""
 	if document.LanguageId != "" {
 		langContext = fmt.Sprintf("You are completing code for a %s file.\n", document.LanguageId)
