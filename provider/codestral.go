@@ -13,7 +13,7 @@ import (
 )
 
 type CodestralProvider struct {
-	ApiKey   string
+	ApiKey string
 }
 
 type CodestralInitializationParams struct {
@@ -37,12 +37,12 @@ func (p *CodestralProvider) Initialize(params any) error {
 }
 
 type CodestralMessage struct {
-	Content   string `json:"content"`
+	Content string `json:"content"`
 }
 
 type CodestralChoice struct {
-	Index        int              `json:"index"`
-	Message      CodestralMessage `json:"message"`
+	Index   int              `json:"index"`
+	Message CodestralMessage `json:"message"`
 }
 
 type CodestralResponse struct {

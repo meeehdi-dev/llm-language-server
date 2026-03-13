@@ -65,6 +65,10 @@ func FindIndex(text string, line int, col int) int {
 		}
 	}
 
+	if l == line {
+		return len(text) + col
+	}
+
 	return -1
 }
 
@@ -78,8 +82,18 @@ func UpdateState(params DidChangeTextDocumentParams) error {
 	}
 
 	for _, change := range params.ContentChanges {
+		if change.Range == nil {
+			current.Text = change.Text
+			continue
+		}
+
 		startIndex := FindIndex(current.Text, change.Range.Start.Line, change.Range.Start.Character)
 		endIndex := FindIndex(current.Text, change.Range.End.Line, change.Range.End.Character)
+
+		if startIndex < 0 || startIndex > len(current.Text) || endIndex < 0 || endIndex > len(current.Text) || startIndex > endIndex {
+			return fmt.Errorf("invalid range for text document update: start=%d, end=%d", startIndex, endIndex)
+		}
+
 		current.Text = current.Text[:startIndex] + change.Text + current.Text[endIndex:]
 	}
 

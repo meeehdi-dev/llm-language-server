@@ -13,7 +13,7 @@ import (
 )
 
 type MistralProvider struct {
-	ApiKey   string
+	ApiKey string
 }
 
 type MistralInitializationParams struct {
@@ -37,12 +37,12 @@ func (p *MistralProvider) Initialize(params any) error {
 }
 
 type MistralMessage struct {
-	Content   string `json:"content"`
+	Content string `json:"content"`
 }
 
 type MistralChoice struct {
-	Index        int              `json:"index"`
-	Message      MistralMessage `json:"message"`
+	Index   int            `json:"index"`
+	Message MistralMessage `json:"message"`
 }
 
 type MistralResponse struct {
