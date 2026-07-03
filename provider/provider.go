@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+
 	"llm-language-server/lsp"
 )
 
@@ -26,6 +27,9 @@ func Initialize(options lsp.InitializationOptions, params any) error {
 		return CurrentProvider.Initialize(params)
 	case "ollama":
 		CurrentProvider = &OllamaProvider{}
+		return CurrentProvider.Initialize(params)
+	case "deepseek":
+		CurrentProvider = &DeepSeekProvider{}
 		return CurrentProvider.Initialize(params)
 	}
 

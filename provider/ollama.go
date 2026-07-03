@@ -9,7 +9,6 @@ import (
 	"llm-language-server/cache"
 	"llm-language-server/lsp"
 	"net/http"
-	"strings"
 )
 
 type OllamaModelParams struct {
@@ -225,44 +224,6 @@ type OllamaGenerateResponse struct {
 	CreatedAt string `json:"created_at"`
 	Response  string `json:"response"`
 	Done      bool   `json:"done"`
-}
-
-func truncate(text string, index int, ctx int) (string, string) {
-	promptLines := strings.Split(text[:index], "\n")
-	suffixLines := strings.Split(text[index:], "\n")
-
-	prompt := promptLines[len(promptLines)-1]
-	suffix := suffixLines[len(suffixLines)-1]
-
-	ctxSize := len(prompt+suffix) / 4
-
-	promptLinesCount := 1
-	suffixLinesCount := 1
-
-	ctxInc := true
-	for ctxInc {
-		ctxInc = false
-
-		if suffixLinesCount < len(suffixLines) {
-			suffix_line := suffixLines[suffixLinesCount]
-			if ctxSize+len(suffix_line) < ctx {
-				suffix = suffix + "\n" + suffix_line
-				suffixLinesCount++
-				ctxInc = true
-			}
-		}
-
-		if promptLinesCount < len(promptLines) {
-			promptLine := promptLines[len(promptLines)-promptLinesCount-1]
-			if ctxSize+len(promptLine) < ctx {
-				prompt = promptLine + "\n" + prompt
-				promptLinesCount++
-				ctxInc = true
-			}
-		}
-	}
-
-	return prompt, suffix
 }
 
 func (p *OllamaProvider) Generate(ctx context.Context, params lsp.InlineCompletionParams) ([]lsp.CompletionItem, error) {
