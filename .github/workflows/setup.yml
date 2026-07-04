@@ -8,7 +8,7 @@ jobs:
   go:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # checkout to get go.sum and enable caching
+      - uses: actions/checkout@v7 # checkout to get go.sum and enable caching
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ inputs.goversion }}
