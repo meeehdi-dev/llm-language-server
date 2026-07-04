@@ -1,0 +1,40 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    cooldown:
+      default-days: 1
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "10:00" # (UTC)
+    labels:
+      - "dependabot"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "github-actions"
+    cooldown:
+      default-days: 1
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "10:00" # (UTC)
+    labels:
+      - "dependabot"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      docker-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
