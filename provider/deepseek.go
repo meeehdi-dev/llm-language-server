@@ -14,11 +14,11 @@ import (
 )
 
 type DeepSeekModelParams struct {
-	LogProbs    *uint
-	MaxTokens   *uint
-	Temperature *float64
-	TopP        *float64
-	Stop        *[]string
+	LogProbs    int     `json:"logprobs"`
+	MaxTokens   int     `json:"max_tokens"`
+	Temperature float32  `json:"temperature"`
+	TopP        float32  `json:"top_p"`
+	Stop        []string `json:"stop"`
 }
 
 type DeepSeekProvider struct {
@@ -27,18 +27,10 @@ type DeepSeekProvider struct {
 	ModelParams DeepSeekModelParams
 }
 
-type DeepSeekModelDetails struct {
-	LogProbs    *uint     `json:"logprobs"`
-	MaxTokens   *uint     `json:"max_tokens"`
-	Temperature *float64  `json:"temperature"`
-	TopP        *float64  `json:"top_p"`
-	Stop        *[]string `json:"stop"`
-}
-
 type DeepSeekInitializationParams struct {
 	Model       string               `json:"model"`
 	ApiKey      string               `json:"api_key"`
-	ModelParams DeepSeekModelDetails `json:"model_params"`
+	ModelParams DeepSeekModelParams `json:"model_params"`
 }
 
 type DeepSeekChoice struct {
