@@ -63,11 +63,7 @@ func (p *DeepSeekProvider) Initialize(params any) error {
 
 	p.Model = deepSeekParams.Model
 	p.ApiKey = deepSeekParams.ApiKey
-	p.ModelParams.LogProbs = deepSeekParams.ModelParams.LogProbs
-	p.ModelParams.MaxTokens = deepSeekParams.ModelParams.MaxTokens
-	p.ModelParams.Temperature = deepSeekParams.ModelParams.Temperature
-	p.ModelParams.TopP = deepSeekParams.ModelParams.TopP
-	p.ModelParams.Stop = deepSeekParams.ModelParams.Stop
+	p.ModelParams = deepSeekParams.ModelParams
 
 	return nil
 }
